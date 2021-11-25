@@ -9,7 +9,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.joesemper.redditpopularposts.databinding.FragmentMainBinding
 import com.joesemper.redditpopularposts.ui.main.adapters.MainRvAdapter
+import com.joesemper.redditpopularposts.ui.main.adapters.PostsRvAdapter
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.androidx.scope.fragmentScope
@@ -24,7 +26,7 @@ class MainFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: MainViewModel by viewModel()
 
-    private lateinit var postsAdapter: MainRvAdapter
+    private lateinit var postsAdapter: PostsRvAdapter
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -39,22 +41,41 @@ class MainFragment : Fragment(), AndroidScopeComponent {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRv()
+//        initRv()
+        initView()
+        collectUiState()
     }
 
-    private fun initRv() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.currentPosts.collect {
-                postsAdapter = MainRvAdapter(it)
-                binding.rvPosts.apply {
+
+    private fun initView() {
+        postsAdapter = PostsRvAdapter()
+        binding.rvPosts.apply {
                     layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
                     adapter = postsAdapter
                 }
-            }
-
-        }
-
     }
+
+    private fun collectUiState() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.getHotPosts().collectLatest { posts ->
+                postsAdapter.submitData(posts)
+            }
+        }
+    }
+
+//    private fun initRv() {
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.currentPosts.collect {
+//                postsAdapter = MainRvAdapter(it)
+//                binding.rvPosts.apply {
+//                    layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+//                    adapter = postsAdapter
+//                }
+//            }
+//
+//        }
+//
+//    }
 
 
 

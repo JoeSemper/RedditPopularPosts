@@ -1,8 +1,11 @@
 package com.joesemper.redditpopularposts.data.datasource.remote
 
+import androidx.paging.*
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.redditpopularposts.data.entity.Children
+import com.joesemper.redditpopularposts.data.entity.PostInfo
 import com.joesemper.redditpopularposts.data.repository.PostsRepository
+import kotlinx.coroutines.flow.Flow
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,6 +24,18 @@ class PostRepositoryRetrofitImpl: PostsRepository {
         return createRetrofit().create(RedditApiService::class.java)
     }
 
+    override fun getAllPosts(): Flow<PagingData<Children>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 25,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                PostsPagingDataSource(service = getService())
+            }
+        ).flow
+    }
+
     private fun createRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_WEATHER_URL)
@@ -32,5 +47,39 @@ class PostRepositoryRetrofitImpl: PostsRepository {
 
     private fun createOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder().build()
+    }
+}
+
+class PostsPagingDataSource(private val service: RedditApiService) :
+    PagingSource<Int, Children>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Children> {
+        val pageNumber = params.key ?: 1
+        return try {
+            val response = service.getPosts()
+            val pagedResponse = response.data
+            val data = pagedResponse.children
+
+            val nextKey =
+                if (data.isEmpty()) {
+                    null
+                } else {
+                    pageNumber + (params.loadSize / 25)
+                }
+
+            LoadResult.Page(
+                data = data,
+                prevKey = null,
+                nextKey = nextKey
+            )
+        } catch (e: Exception) {
+            LoadResult.Error(e)
+        }
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, Children>): Int? {
+        return state.anchorPosition?.let { anchorPosition ->
+            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
+                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
+        }
     }
 }
