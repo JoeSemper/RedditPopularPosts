@@ -1,10 +1,11 @@
 package com.joesemper.redditpopularposts.data.entity
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "posts")
 data class PostInfo(
-    val id: String = "",
+    @PrimaryKey val id: String = "",
     val author: String = "",
     val num_comments: Int = 0,
     val title: String = "",
