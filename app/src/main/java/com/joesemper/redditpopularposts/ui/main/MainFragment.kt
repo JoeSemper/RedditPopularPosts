@@ -1,20 +1,18 @@
 package com.joesemper.redditpopularposts.ui.main
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.joesemper.redditpopularposts.databinding.FragmentMainBinding
-import com.joesemper.redditpopularposts.ui.main.adapters.MainRvAdapter
 import com.joesemper.redditpopularposts.ui.main.adapters.PostsRvAdapter
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.android.scope.AndroidScopeComponent
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.androidx.scope.fragmentScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 
 class MainFragment : Fragment(), AndroidScopeComponent {
@@ -41,7 +39,6 @@ class MainFragment : Fragment(), AndroidScopeComponent {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        initRv()
         initView()
         collectUiState()
     }
@@ -50,9 +47,9 @@ class MainFragment : Fragment(), AndroidScopeComponent {
     private fun initView() {
         postsAdapter = PostsRvAdapter()
         binding.rvPosts.apply {
-                    layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-                    adapter = postsAdapter
-                }
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            adapter = postsAdapter
+        }
     }
 
     private fun collectUiState() {
@@ -62,21 +59,6 @@ class MainFragment : Fragment(), AndroidScopeComponent {
             }
         }
     }
-
-//    private fun initRv() {
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.currentPosts.collect {
-//                postsAdapter = MainRvAdapter(it)
-//                binding.rvPosts.apply {
-//                    layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-//                    adapter = postsAdapter
-//                }
-//            }
-//
-//        }
-//
-//    }
-
 
 
 }

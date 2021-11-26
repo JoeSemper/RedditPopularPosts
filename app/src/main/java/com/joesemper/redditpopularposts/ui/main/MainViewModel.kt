@@ -14,18 +14,6 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: PostsRepository) : ViewModel() {
 
-    val currentPosts = MutableStateFlow<List<Children>>(listOf())
-
-    init {
-        getPosts()
-    }
-
-    private fun getPosts() {
-        viewModelScope.launch {
-            currentPosts.value = repository.getPosts(0)
-        }
-    }
-
     fun getHotPosts(): Flow<PagingData<PostInfo>> {
         return repository.getAllPosts().cachedIn(viewModelScope)
     }
